@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
 import mock
 import requests
 import slumber
@@ -417,6 +416,21 @@ class ResourceTestCase(unittest.TestCase):
         self.base_resource._store["session"].request.return_value = r
 
         with self.assertRaises(exceptions.HttpNotFoundError):
+            self.base_resource.req._request("GET")
+
+    def test_get_429_response(self):
+        r = mock.Mock(spec=requests.Response)
+        r.status_code = 429
+        r.headers = {"content-type": "application/json"}
+        r.content = ''
+
+        self.base_resource._store.update({
+            "session": mock.Mock(spec=requests.Session),
+            "serializer": slumber.serialize.Serializer(),
+        })
+        self.base_resource._store["session"].request.return_value = r
+
+        with self.assertRaises(exceptions.HttpTooManyRequestsError):
             self.base_resource.req._request("GET")
 
     def test_get_500_response(self):
