@@ -1,4 +1,4 @@
-from .utils import url_join, iterator
+from .utils import iterator
 
 
 class SlumberBaseException(Exception):
@@ -27,6 +27,12 @@ class HttpClientError(SlumberHttpBaseException):
 class HttpNotFoundError(HttpClientError):
     """
     Called when the server sends a 404 error.
+    """
+
+
+class HttpTooManyRequestsError(HttpClientError):
+    """
+    Called when the server sends a 429 error.
     """
 
 

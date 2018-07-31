@@ -97,7 +97,12 @@ class Resource(ResourceAttributesMixin, object):
         resp = self._store["session"].request(method, url, data=data, params=params, files=files, headers=headers)
 
         if 400 <= resp.status_code <= 499:
-            exception_class = exceptions.HttpNotFoundError if resp.status_code == 404 else exceptions.HttpClientError
+            if resp.status_code == 404:
+                exception_class = exceptions.HttpNotFoundError
+            elif resp.status_code == 429:
+                exception_class = exceptions.HttpTooManyRequestsError
+            else:
+                exception_class = exceptions.HttpClientError
             raise exception_class("Client Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
         elif 500 <= resp.status_code <= 599:
             raise exceptions.HttpServerError("Server Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
